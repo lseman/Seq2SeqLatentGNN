@@ -20,17 +20,18 @@ A sequence‑to‑sequence graph forecasting model with a **learnable latent gra
 
 ```mermaid
 flowchart LR
-    X[Inputs\nB×T_in×N×F] -->|permute| FNO[CustomFourierLayer\n2D rFFT]
-    FNO -->|residual add| XT[Encoded tensor\nB×T_in×N×F]
-    subgraph Latent Graph per t
-        XT -->|for t=1..T_in| LGCN1[LatentCorrelationGCN\n(in=F, out=H)] --> LGCN2[LatentCorrelationGCN\n(in=H, out=H)]
+    X[Inputs<br/>B×T_in×N×F] -->|permute| FNO[CustomFourierLayer<br/>2D rFFT]
+    FNO -->|residual add| XT[Encoded tensor<br/>B×T_in×N×F]
+    subgraph "Latent Graph per t"
+        direction LR
+        XT --> LGCN1[LatentCorrelationGCN<br/>(in=F, out=H)] --> LGCN2[LatentCorrelationGCN<br/>(in=H, out=H)]
     end
-    LGCN2 --> ENCSTACK[Stack over time\nB×T_in×N×H]
+    LGCN2 --> ENCSTACK[Stack over time<br/>B×T_in×N×H]
     ENCSTACK -->|reshape B×N×T_in×H| LSTMENC[LSTM Encoder]
     LSTMENC -->|h,c| LSTMDEC[LSTM Decoder]
     LSTMDEC --> ATT[Attention over encoder states]
     ATT --> FC[FC_out + final_out]
-    FC --> OUTSEQ[Predictions\nB×T_out×N]
+    FC --> OUTSEQ[Predictions<br/>B×T_out×N]
     OUTSEQ --> GAUSS[GaussianSmoothingLayer]
     GAUSS --> Yhat[Smoothed predictions]
 ```
