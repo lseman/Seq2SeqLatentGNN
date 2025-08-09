@@ -20,20 +20,20 @@ A sequence‑to‑sequence graph forecasting model with a **learnable latent gra
 
 ```mermaid
 flowchart LR
-    X[Inputs<br/>B×T_in×N×F] -->|permute| FNO[CustomFourierLayer<br/>2D rFFT]
-    FNO -->|residual add| XT[Encoded tensor<br/>B×T_in×N×F]
-    subgraph "Latent Graph per t"
-        direction LR
-        XT --> LGCN1[LatentCorrelationGCN<br/>(in=F, out=H)] --> LGCN2[LatentCorrelationGCN<br/>(in=H, out=H)]
-    end
-    LGCN2 --> ENCSTACK[Stack over time<br/>B×T_in×N×H]
-    ENCSTACK -->|reshape B×N×T_in×H| LSTMENC[LSTM Encoder]
-    LSTMENC -->|h,c| LSTMDEC[LSTM Decoder]
-    LSTMDEC --> ATT[Attention over encoder states]
-    ATT --> FC[FC_out + final_out]
-    FC --> OUTSEQ[Predictions<br/>B×T_out×N]
-    OUTSEQ --> GAUSS[GaussianSmoothingLayer]
-    GAUSS --> Yhat[Smoothed predictions]
+  X["Inputs B×T_in×N×F"] -->|permute| FNO["CustomFourierLayer rFFT2"]
+  FNO -->|residual add| XT["Encoded tensor B×T_in×N×F"]
+  subgraph Latent_Graph_per_t
+    XT --> LGCN1["LatentCorrelationGCN in:F→H"]
+    LGCN1 --> LGCN2["LatentCorrelationGCN in:H→H"]
+  end
+  LGCN2 --> ENCSTACK["Stack over time B×T_in×N×H"]
+  ENCSTACK -->|reshape B×N×T_in×H| LSTMENC["LSTM Encoder"]
+  LSTMENC -->|h,c| LSTMDEC["LSTM Decoder"]
+  LSTMDEC --> ATT["Attention over encoder states"]
+  ATT --> FC["FC_out + final_out"]
+  FC --> OUTSEQ["Predictions B×T_out×N"]
+  OUTSEQ --> GAUSS["GaussianSmoothingLayer"]
+  GAUSS --> Yhat["Smoothed predictions"]
 ```
 
 ---
